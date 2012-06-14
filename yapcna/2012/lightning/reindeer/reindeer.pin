@@ -1,0 +1,242 @@
+#!/usr/bin/env pinpoint
+#
+# Copyright 2012 Chris Weyl <cweyl@alumni.drew.edu>
+#
+# You may use this work under the terms of the Creative Commons 3.0
+# Attribution-ShareAlike license - CC BY-SA
+# http://creativecommons.org/licenses/by-sa/3.0/legalcode
+
+[black]
+[center]
+#[font=monospace 36px]
+[font=Sans 50px]
+#[transition=slide-left]
+[text-align=center]
+#[reindeer-wallpaper.jpg]
+[fill]
+[shading-opacity=0.900000]
+
+
+-- [text-align=left] [top-right] [reindeer-wallpaper.jpg] [fill]
+
+Reindeer
+
+Chris "RSRCHBOY" Weyl
+cweyl@alumni.drew.edu
+
+--
+
+Moose is great
+
+--
+
+MooseX is great (usually)
+
+--
+
+MooseX pros / cons
+
+left as an exercise for the reader
+
+--
+
+...but generally:
+
+* they don't always play well together
+* you can't use what you don't know about
+* you have to use them all explicitly, everywhere
+
+--
+
+Most people using Moose have at
+least one, probably three MX'en
+they use on a regular basis
+
+--
+
+Typical workflow
+
+(if a bit contrived)
+
+-- [font=monospace 36px] [text-align=left] [top-left]
+
+<span fgcolor="blue">
+\# simple
+</span>
+
+use Moose;
+has foo => (is => 'rw');
+no Moose;
+
+-- [font=monospace 36px] [text-align=left] [top-left]
+
+<span fgcolor="blue">
+\# type our foo attribute, decide it's going to be lazy and a builder.
+\# use autoclean because we're importing more.  add Path::Class and
+\# types use lines.
+\# add bar attribute.
+</span>
+
+use Moose;
+use namespace::autoclean;
+use Path::Class;
+use MooseX::Types::Path::Class 'File';
+
+has foo => (is => 'ro', isa => File, lazy => 1, builder => '_build_foo');
+sub _build_foo { file ... }
+
+has bar => (
+    is        => 'ro',
+    isa       => Dir,
+    lazy      => 1,
+    coerce    => 1,
+    predicate => 'has_bar',
+    builder   => '_build_foo',
+);
+sub _build_bar { dir ... }
+
+- [font=monospace 36px] [text-align=left] [top-left]
+
+<span fgcolor="blue">
+\# realize that we want to coerce everything, add MX::AlwaysCoerce,
+\# and remove bar's explicit coerce
+\# find BUG in bar's builder definition
+</span>
+
+use Moose;
+use namespace::autoclean;
+use Path::Class;
+use MooseX::AlwaysCoerce;
+use MooseX::Types::Path::Class ':all';
+
+has foo => (is => 'ro', isa => File, lazy => 1, builder => '_build_foo');
+sub _build_foo { file ... }
+
+has bar => (
+    is        => 'ro',
+    isa       => Dir,
+    lazy      => 1,
+    predicate => 'has_bar',
+    builder   => '_build_foo', <span foreground='red'># bzzzzt!</span>
+);
+sub _build_bar { dir ... }
+
+- [font=monospace 36px] [text-align=left] [top-left]
+
+<span fgcolor="blue">
+\# add MX::AttributeShortcuts so we don't botch builders again; replace
+\# bar's builder definition
+</span>
+
+use Moose;
+use namespace::autoclean;
+use Path::Class;
+use MooseX::AlwaysCoerce;
+use MooseX::AttributeShortcuts;
+use MooseX::Types::Path::Class ':all';
+
+has foo => (is => 'ro', isa => File, lazy => 1, builder => '_build_foo');
+sub _build_foo { file ... }
+
+has bar => (
+    is        => 'ro',
+    isa       => Dir,
+    lazy      => 1,
+    predicate => 'has_bar',
+    builder   => 1,
+);
+sub _build_bar { dir ... }
+
+-- [center] [red] [font=Sans 100px] [transition=page-curl-both]
+
+ARRRRRGH
+
+-- [font=monospace 36px] [text-align=left] [top-left]
+
+<span fgcolor="blue">
+\# expressed concisely with Reindeer
+</span>
+use Reindeer;
+
+has foo => (is => 'lazy', isa => File);
+sub _build_foo { file ... }
+
+has bar => (is => 'lazy', isa => Dir, predicate => 1);
+sub _build_bar { dir ... }
+
+-
+
+Reindeer is:
+
+...a collection of traits and sugar
+composed together with Moose::Exporter
+and some glue.
+
+...a standard set of useful<span fgcolor="red">*</span> MooseX'en,
+pre-massaged into a cohesive whole with
+unified documentation.
+
+...drop-in for Moose (<tt>use Reindeer;</tt>), and Moose::Role
+(<tt>use Reindeer::Role</tt>)
+
+-
+
+When you use Reindeer, you
+know what sort of Moose you're
+getting, right off the bat.
+
+(no more scrolling up or guessing)
+
+-
+
+<span fgcolor="blue">MX'en:</span>
+
+MooseX::AbstractMethod
+MooseX::AlwaysCoerce
+MooseX::AttributeShortcuts
+MooseX::ClassAttribute
+MooseX::CurriedDelegation
+MooseX::LazyRequire
+MooseX::NewDefaults
+MooseX::StrictConstructor
+MooseX::Traits
+
+-
+
+<span fgcolor="blue">Bundled Type Libraries:</span>
+
+MooseX::Types::Moose
+MooseX::Types::Common::String
+MooseX::Types::Common::Numeric
+MooseX::Types::LoadableClass
+MooseX::Types::Path::Class
+MooseX::Types::Tied::Hash::IxHash
+
+-
+
+<span fgcolor="blue">Attribute Traits:</span>
+
+All accessible by alias; aliases are created for
+those traits not endowed with one
+
+AutoDestruct
+MultiInitArg
+LazyRequire
+UndefTolerant
+ENV
+etc
+
+-
+
+<span fgcolor="blue">Additional imports from:</span>
+
+Try::Tiny
+<span fgcolor="grey">(<tt>try(), catch(), etc</tt>)</span>
+Path::Class
+<span fgcolor="grey">(<tt>file(), dir()</tt>)</span>
+Moose::Util::TypeConstraints
+<span fgcolor="grey">(<tt>class_type(), role_type()</tt>)</span>
+
+-
+
+Reindeer is Moose with larger antlers.
